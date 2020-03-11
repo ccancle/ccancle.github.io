@@ -15,3 +15,4 @@ categories: "LeetCode"
 | 题号   |                            题目名                       | 难度   | 通过率  |
 | :---: |                           :----:                        | :----: | :----: |
 | 70   | [爬楼梯](https://www.macchac.com/2020/03/10/LeetCode-70/) | 简单   |  48.0% |
+| 121   | [买卖股票的最佳时机](https://www.macchac.com/2020/03/11/LeetCode-121/) | 简单   |  53.6% |
