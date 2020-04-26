@@ -1035,6 +1035,7 @@ vendors:
 css: css
 js: js
 images: images
+custom: custom
 
 # 鼠标点击特效
 # mouse click effect: fireworks | explosion | love | text

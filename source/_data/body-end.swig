@@ -20,3 +20,6 @@
     document.body.addEventListener('input', POWERMODE);
   </script>
 {% endif %}
+
+{# 代码压缩 #}
+<script type="text/javascript" src="/js/fold_action.js"></script>

@@ -46,3 +46,15 @@ body {
     top: 100vh < (900px + 200px) ? calc( 100vh - 900px - 200px ) : 0px;
   }
 }
+
+// 代码折叠功能添加
+.hider_title{
+    cursor: pointer;
+    color: #339933;
+}
+.close:before{
+    content: "▼";
+}
+.open:before{
+    content: "▲";
+}
