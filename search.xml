@@ -1,0 +1,810 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>当你在浏览器中输入Url之后发生了什么</title>
+    <url>/2021/03/29/urll/</url>
+    <content><![CDATA[<p>最近重新过了一遍网络的基础内容，之前看这个问题的时候觉得这个问题也没有多少东西可说，但是现在重新来看这个题目的时候，发现之前是没有一个相对完整的知识体系，这个问题基本上可以囊括一大半的网络基础知识内容<br></p>
+<p>本次重新梳理一下这个问题的内容，其实换个角度看，这个问题也是在问HTTP请求的完整过程。</p>
+<p>（也当是重新回学校之后开始整理博客的第一篇吧）</p>
+<a id="more"></a>
+
+<h2 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h2><ul>
+<li><strong>URL解析</strong> 浏览器对网址进行格式化检查，判断是否有效，没有给定协议则默认为Http协议</li>
+<li><strong>DNS解析</strong> 根据DNS查询IP地址的过程【浏览器缓存，操作系统缓存，路由器缓存，本地域名服务器缓存，根域名】</li>
+<li><strong>协议栈</strong>：通过DNS获取到IP地址之后，就可以把HTTP的传输工作交给操作系统中的协议栈</li>
+<li><strong>TCP链接</strong>：三次握手建立连接</li>
+<li><strong>HTTP请求</strong>：是否使用缓存？</li>
+<li><strong>处理请求</strong>：<ul>
+<li>加上IP首部：TCP模块再执行链接，收发，断开等各个阶段操作的时候，都需要委托IP模块将数据封装成网络包发送给通信对象。</li>
+<li>机上MAC头部：生辰了IP头部之后，接下来网络包还需要在IP头部加上MAC头部</li>
+<li>网卡出关：IP生成的网络包只是存放在内存中的一串二进制数字信号，没办法直接发送给对方，因此我们需要将数字信号转换成电信号，才能在网线中传输，这才是真正数据发送的过程</li>
+<li>将包通过交换机传输，交换机根据MAC地址表查询MAC地址，将信号发送给相应的端口</li>
+<li>通过路由器传输：网络包经过交换机之后到达路由器，并在此转发到下一个路由器或者目标设备</li>
+<li>到达服务器拆解数据包</li>
+</ul>
+</li>
+<li><strong>接受响应</strong>：服务器响应请求：解析请求，生成相应头和具体响应内容：2是正常，3开头是转发重定向，4开头是客户端错误，5开头是服务器错误</li>
+<li><strong>浏览器解析</strong>：根据不同的响应状态码处理不同的操作</li>
+<li><strong>渲染页面</strong>：浏览器显示HTML界面，想服务器发送请求获取嵌入在HTML中的对象，发送异步请求</li>
+<li><strong>关闭TCP请求连接</strong>：根据连接属性判断是否断开连接【四次挥手】</li>
+</ul>
+<hr>
+<h2 id="URL解析"><a href="#URL解析" class="headerlink" title="URL解析"></a><strong>URL解析</strong></h2><p>如：<a href="http://www.macchac.com/2020/01/27/test" target="_blank" rel="noopener">http://www.macchac.com/2020/01/27/test</a>  根据元素组成拆分解析：</p>
+<p><strong>http:</strong>  url开头表示访问数组的协议（若没有则默认为http协议）</p>
+<p><strong>//</strong>：（//后面的字符串表示服务器的名称、域名）</p>
+<p><strong><a href="http://www.macchac.com" target="_blank" rel="noopener">www.macchac.com</a></strong>：服务器的名称或者域名</p>
+<p><strong>/2020/01/27/test</strong>：数据源（文件）的路径</p>
+<blockquote>
+<p>如果数据源地址都省略了那应该请求那个文件？ 请求根目录下事先设置的默认文件 如<strong>index.html</strong></p>
+</blockquote>
+<p>同时还会进行安全检查，访问限制等</p>
+<p><strong>检查缓存</strong></p>
+<p><img src="/.com//HTTP-Cache.jpg" alt="HTTP缓存"></p>
+<p>根据解析的服务器名称和文件名称生成HTTP请求消息</p>
+<hr>
+<h2 id="DNS解析过程"><a href="#DNS解析过程" class="headerlink" title="DNS解析过程"></a><strong>DNS解析过程</strong></h2><blockquote>
+<ul>
+<li><p>域名层级关系：</p>
+<p>DNS中的域名都适用句号来分割的，比如 <a href="http://www.macchac.com" target="_blank" rel="noopener">www.macchac.com</a>  这里的句号代表了不同层级的分割界限，越靠右的位置表示层级越高。</p>
+<p>根域在最顶层，他的下一层就是<strong>com顶级域名</strong>，在下层就是 <strong>macchac.com</strong> </p>
+<p>所以域名层级关系类似于一个树状结构：</p>
+<ul>
+<li>根DNS服务器</li>
+<li>顶级域DNS服务器（com）</li>
+<li>权威DNS服务器（server.com）</li>
+</ul>
+</li>
+</ul>
+<p>根域的DNS服务器信息保存在互联网中所有的DNS服务器中，</p>
+<p>这样一来，任何DNS服务器都可以找到并访问跟域DNS服务器了</p>
+<p>因此，客户端只要知道服务器名称，找到任意一台DNS服务器，就可以通过它找到根域DNS服务器，然后一路向下找到位于下层的某台目标DNS服务器</p>
+</blockquote>
+<h3 id="域名解析的工作流程："><a href="#域名解析的工作流程：" class="headerlink" title="域名解析的工作流程："></a><strong>域名解析的工作流程：</strong></h3><p><img src="/.com//endpoint.jpg" alt="域名解析流程"></p>
+<p>浏览器先以此查看浏览器、操作系统、host、路由器DNS缓存，如果这中间任何一个环节发现存在此地址的缓存，则直接返回对应的IP地址。如果使用了强缓存，浏览器查看本地强缓存是否过期，</p>
+<ul>
+<li>若不过期，则返回文件。</li>
+<li>如果缓存过期，则建立连接，发送请求拉取资源</li>
+</ul>
+<p>1、客户端发出一个DNS请求，询问<a href="http://www.macchac.com" target="_blank" rel="noopener">www.macchac.com</a> 的IP是什么，并发给本地的DNS服务器（电信，移动），（客户端TCP/IP中填写的 DNS服务器地址）</p>
+<p>2、本地服务器接收到客户端请求之后，查看缓存</p>
+<ul>
+<li>如果缓存中能够找到<a href="http://www.macchac.com" target="_blank" rel="noopener">www.macchac.com</a> 就直接返回，<ul>
+<li>之后浏览器需要根据IP与缓存的对应关系，查看本地强缓存是否过期，</li>
+<li>若不过期，返回文件。缓存过期，则建立链接，发送请求拉取资源</li>
+</ul>
+</li>
+<li>如果没有缓存则本地DNS会去询问根域名服务器，根域名服务器是最高层次的，不会参与域名解析，只会指明去下层服务器找（类似于双亲委派机制）</li>
+</ul>
+<p>3、收到来自本地的DNS的请求之后，发现后置是 <strong>.com</strong> ,就返回 .com 顶级域名服务器地址给客户端，</p>
+<p>4、本地DNS 服务器再次请求 .com 顶级域名服务器 询问 <a href="http://www.macchac.com" target="_blank" rel="noopener">www.macchac.com</a>  的IP地址</p>
+<p>5、com顶级域名地址找到 <a href="http://www.macchac.com" target="_blank" rel="noopener">www.macchac.com</a> 的权威DNS服务器（负责此域名的DNS服务器）并返回给客户端</p>
+<p>6、本地DNS服务器转向询问权威DNS服务器，查询后将对应的 IP 地址 xxx.xxx.xxx.xx告诉本地DNS服务器，</p>
+<p>7、本地DNS将IP地址返回给客户端（并建立缓存）</p>
+<p>8、浏览器查看本地强缓存是否过期，如果没过期则返回文件，如果过期，则建立连接，发起请求拉取资源</p>
+<p><img src="/.com//DNS.png" alt="DNS解析过程"></p>
+<h3 id="CDN负载均衡"><a href="#CDN负载均衡" class="headerlink" title="CDN负载均衡"></a>CDN负载均衡</h3><blockquote>
+<p> 如果亿万请求全部位于一个机器上，则会出现负载量过大的问题，解决方法就是DNS负载均衡技术：</p>
+<p> 在DNS服务器中为同一个主机分配多个IP地址，在应答DNS查询的时候，将客户端的访问引导到不同的机器上去，从而达到负载均衡的目的，比如位于北京的客户端请求一个服务器地址，</p>
+<p> 如果使用了CDN加速</p>
+</blockquote>
+<p><img src="/.com//CDN.png" alt="CDN访问过程"></p>
+<blockquote>
+<ol>
+<li><p>当终端用户（北京）向<code>www.a.com</code>下的指定资源发起请求时，首先向LDNS（本地DNS）发起域名解析请求。</p>
+</li>
+<li><p>LDNS检查缓存中是否有<code>www.a.com</code>的IP地址记录。如果有，则直接返回给终端用户；如果没有，则向授权DNS查询。</p>
+</li>
+<li><p>当授权DNS解析<code>www.a.com</code>时，返回域名CNAME <code>www.a.tbcdn.com</code>对应IP地址。</p>
+</li>
+<li><p>域名解析请求发送至DNS调度系统，并为请求分配最佳节点IP地址。</p>
+</li>
+<li><p>LDNS获取DNS返回的解析IP地址。</p>
+</li>
+<li><p>用户获取解析IP地址。</p>
+</li>
+<li><p>用户向获取的IP地址发起对该资源的访问请求。</p>
+<ul>
+<li>如果该IP地址对应的节点已缓存该资源，则会将数据直接返回给用户，例如，图中步骤7和8，请求结束。</li>
+<li>如果该IP地址对应的节点未缓存该资源，则节点向源站发起对该资源的请求。获取资源后，结合用户自定义配置的缓存策略，将资源缓存至节点，例如，图中的北京节点，并返回给用户，请求结束。</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<hr>
+<h2 id="发给协议栈"><a href="#发给协议栈" class="headerlink" title="发给协议栈"></a>发给协议栈</h2><p>通过DNS获取到IP地址之后就可以把HTTP的传输工作交给操作系统的协议栈了</p>
+<p><img src="/.com//progress.jpg" alt="协议栈请求过程"></p>
+<p><strong>应用层：发送HTTP请求</strong></p>
+<p>封装请求报头，请求方式：GET、POST，地址、协议等</p>
+<p>请求主体、</p>
+<p><strong>传输层：TCP传输报文</strong></p>
+<p>​    传输层会发起一条到达服务器的 TCP 连接，为了方便传输，会对数据进行分割（以报文段为单位），并标记编号，方便服务器接受时能够准确地还原报文信息。</p>
+<p>​    确认进行TCP三次握手，注意点：SYN洪范攻击</p>
+<p><strong>网络层：IP协议查询Mac地址</strong>：</p>
+<p>​    将数据段打包，并加入源及目标的IP地址，并且负责寻找传输路线。</p>
+<p>​    判断目标地址是否与当前地址处于同一网络中，是的话直接根据 Mac 地址发送，否则使用路由表查找下一跳地址，以及使用 ARP 协议查询它的 Mac 地址。</p>
+<p><strong>链路层：以太网协议</strong></p>
+<p>​    Mac地址、广播、接收方单播、注意点：ARP攻击</p>
+<p><strong>服务器接受请求</strong>：上述步骤反过来</p>
+<hr>
+<h3 id="TCP连接"><a href="#TCP连接" class="headerlink" title="TCP连接"></a>TCP连接</h3><p>TCP/IP</p>
+<p>三次握手建立可靠的，单点连接</p>
+<p><img src="/.com//tcpCenter.png" alt="TCP报文段"></p>
+<ul>
+<li><p>源端口号和目的端口号确定发送方和接收方，</p>
+</li>
+<li><p>序号解决包的乱序问题，</p>
+</li>
+<li><p>确认序号，确认发出去对方是否收到，如果没有收到就应该重新发送，直到送达，为了解决不丢包问题</p>
+</li>
+<li><p>状态位中：SYN是建立连接标记、ACK是确认回复标记、RST是重新连接标记、FIN是结束连接标记、双方要维护连接的状态，这些标记位的包的更新会引起双方连接的状态变更</p>
+</li>
+<li><p>窗口大小：</p>
+<ul>
+<li>TCP要做流量控制，通信双方各声明一个窗口大小（缓存），标识自己当前能够的处理能力，避免发送太快，无法处理，发送太慢，浪费资源</li>
+<li>拥塞控制，对于真正的通路堵车不堵车，它无能为力，只能做到的是在网络情况差的时候控制发送数据的速度</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>TCP在建立连接之前一定要做的就是三次握手：</p>
+<p>服务端端口处于LISTEN状态下，一直监听客户端的请求</p>
+<p>1、客户端发出建立连接的请求，<strong>SYN=1、seq=x</strong>，等待服务端反馈，进入<strong>SYN-SENT</strong>状态</p>
+<p>2、服务端收到请求，返回<strong>SYN=1、ACK=1、seq=y、ack=x+1</strong>，之后进入<strong>SYN-RECV</strong>状态</p>
+<p>3、客户端收到服务端发送的确认包，发送确认包 <strong>SYN=1、ACK=1、seq=x+1、ack=y+1</strong>，之后进入<strong>ESTABLISH</strong>状态</p>
+<p>4、服务端收到ACK包，进入<strong>ESTABLISHED</strong>状态</p>
+</blockquote>
+<p><img src="/.com//shackhands.png" alt="三次握手过程"></p>
+<h4 id="为什么一定要三次握手（而不是两次、四次）"><a href="#为什么一定要三次握手（而不是两次、四次）" class="headerlink" title="为什么一定要三次握手（而不是两次、四次）"></a>为什么一定要三次握手（而不是两次、四次）</h4><p>TCP连接：用于保证可靠性和流量控制维护的某些状态信息，这些信息的组合，包括Socket、序列号、和窗口大小成为连接，主要有下面几个原因：</p>
+<h5 id="1、三次握手才能够阻止重复历史连接的初始化（主要原因）"><a href="#1、三次握手才能够阻止重复历史连接的初始化（主要原因）" class="headerlink" title="1、三次握手才能够阻止重复历史连接的初始化（主要原因）"></a>1、三次握手才能够阻止重复历史连接的初始化（主要原因）</h5><h5 id="2、三次握手才能够保证客户端、服务端双方的发送、接收能力正常"><a href="#2、三次握手才能够保证客户端、服务端双方的发送、接收能力正常" class="headerlink" title="2、三次握手才能够保证客户端、服务端双方的发送、接收能力正常"></a>2、三次握手才能够保证客户端、服务端双方的发送、接收能力正常</h5><h5 id="3、三次握手才可以同步双方的初始化序列号"><a href="#3、三次握手才可以同步双方的初始化序列号" class="headerlink" title="3、三次握手才可以同步双方的初始化序列号"></a>3、三次握手才可以同步双方的初始化序列号</h5><h5 id="4、三次握手能够避免资源的浪费"><a href="#4、三次握手能够避免资源的浪费" class="headerlink" title="4、三次握手能够避免资源的浪费"></a>4、三次握手能够避免资源的浪费</h5><p>TCP 建立连接时，通过三次握手能防止历史连接的建立，能减少双方不必要的资源开销，能</p>
+<p>帮助双方同步初始化序列号。序列号能够保证数据包不重复、不丢弃和按序传输</p>
+<blockquote>
+<p>两次握手：无法防止历史连接的建立，会造成双方的资源浪费，也无法可靠的同步双方的序列号</p>
+<p>四次握手：三次握手时理论上最少的可靠连接的建立，更多的通信次数也是资源的浪费</p>
+</blockquote>
+<hr>
+<p><strong>原因一的具体分析：</strong>防止旧的实效连接重复的初始化造成混乱</p>
+<p><img src="/.com//shakehand3.png" alt="三次握手避免历史连接"></p>
+<p>客户端在某些网络不稳定的情况下发送多个SYN建立连接的请求报文：</p>
+<ul>
+<li>【旧的SYN报文】比【最新的SYN报文】先到达了服务端</li>
+<li>那么此时服务端返回一个ACK包（SYN+ACK）给客户端</li>
+<li>客户端接收到之后，能够根据自身的上下文报文序号，判断出这是一个已经失效的历史连接（序列号过期或者超时）那么客户端就会发送RST报文给服务端，终止这次连接</li>
+</ul>
+<p>如果是两次握手的情况下，服务端不能判断当前连接是否是历史连接，三次握手则可以在客户端准备发送第三次报文的时候，能够根据上下文判断是否是历史连接，</p>
+<ul>
+<li>如果是历史连接（序列号过期或者失效），客户端返回RST报文，告知服务端端开此次连接请求，终止历史连接</li>
+<li>如果不是历史连接，第三次发送的就是ACK报文，双方成功建立连接；</li>
+</ul>
+<p>所以，TCP使用三次握手建立连接主要原因是为了防止历史连接被重新初始化。</p>
+<hr>
+<p><strong>原因二的具体分析：</strong> 保证双方的发送、接收能力正常</p>
+<p>要想建立起可靠的连接，需要双方都确保自己的发送数据，接收数据能力正常，</p>
+<ul>
+<li>第一次“握手” 之后，客户端发送SYN包，服务端可以确认自己的接收能力正常，而客户端无任何感知</li>
+<li>第二次握手之后， 服务端发送SYN+ACK包，客户端可以确认自己的接收能力和发送能力正常，服务端无感知</li>
+<li>第三次握手之后，客户端发送ACK包，服务端可以确认自己的发送能力正常，双方可以开始建立连接通信</li>
+</ul>
+<p>最少需要三次，其中第二步的SYN和ACK可以拆分成两个数据包发送，变成四次握手，但会因此增加通信次数，不必要</p>
+<hr>
+<p><strong>原因三的具体分析：</strong>TCP通信双方都需要维护一个系列号，序列号是可靠性传输的一个关键因素：</p>
+<ul>
+<li>接收方可以去除重复的数据</li>
+<li>接收方可以根据数据包的序列号去按顺序接收</li>
+<li>可以标识发送出去的数据包中，那一些是已经被对方接收到的；</li>
+</ul>
+<p>可见序列号在TCP连接中占据非常重要的作用。客户端发送携带【初始序列号】的SYN包，需要服务端返回一个ACK应答包，标识客户端的SYN报文已经被服务端成功接收，当服务端的【初始化序列号】给客户端的时候，依然也要得到客户端的应答回应，这样才能确保双方的初始化序列号能被可靠的同步</p>
+<hr>
+<p><strong>原因四的具体分析：</strong>两次握手会造成消息滞留，服务端重复接收无用的连接请求SYN报文。导致重复分配资源。</p>
+<p>​    如果只有两次握手，当网络不稳定，或者客户端的SYN请求包在网络中发生阻塞，客户端没有接收到ACK报文，就会重新发送建立连接的SYN数据包，由于没有第三次握手，服务端就不清楚客户端是否接收到自己发送的建立连接的ACK确认信号，每次收到一个SYN就主动建立一个连接，会造成重复发送多次SYN报文，服务端也建立多个无用冗余的TCP连接通道，造成了不必要的浪费。</p>
+<p><img src="/.com//shakehand2.png" alt="两次握手"></p>
+<h4 id="三次握手存在的缺陷"><a href="#三次握手存在的缺陷" class="headerlink" title="三次握手存在的缺陷"></a>三次握手存在的缺陷</h4><h5 id="1、SYN泛洪攻击"><a href="#1、SYN泛洪攻击" class="headerlink" title="1、SYN泛洪攻击"></a>1、SYN泛洪攻击</h5><p>原理：<strong>服务器端的资源分配是在二次握手时分配的，而客户端的资源是在完成三次握手时分配的</strong>，所以服务器容易受到SYN洪泛攻击。</p>
+<p>​    当大量的攻击者请求建立连接的时候，短时间内伪造出大量不存在的IP地址，向服务器发送SYN请求建立连接，服务器在接受请求之后向该IP回复SYN和ACK，进入SYN_RECV 半连接状态，但是由于找不到对应的IP地址的主机，当超时时服务器无法接收到ACK会进行重复发送直到超时，这种伪造的SYN包长时间占用半连接队列，导致正常的请求因为队列满而无法处理被丢弃，从而引起网络阻塞或者系统瘫痪，</p>
+<p>​    防范措施：</p>
+<ul>
+<li>降低SYN timeout时间，使得主机尽快释放半连接的占用</li>
+<li>增加最大半连接队列大小</li>
+<li>采用SYN cookie设置，如果短时间内接收到多个相同IP的重复SYN请求，则默认认为受到了攻击，丢弃该IP地址的后续请求报文</li>
+<li>在网关处设置过滤，拒绝一个源IP地址不属于其来源子网的包进行更远的路由</li>
+</ul>
+<h5 id="2、SYN洪范攻击"><a href="#2、SYN洪范攻击" class="headerlink" title="2、SYN洪范攻击"></a>2、SYN洪范攻击</h5><p>​    当客户端发送连接SYN包给服务端之后，服务端返回ACK和SYN，攻击者截获ACK和SYN包，然后伪装成原始主机继续和服务器进行通信，</p>
+<p>它通过TCP连接的一个缺陷，向网络服务所在端口发送大量的伪造地址的攻击报文，可能造成目标服务器中的半连接队列被占满，从而阻止服务器响应其他连接请求，主要特征是同一个IP地址发送大量的连接请求，但是都缺少第三次握手的ACK回复，</p>
+<p>原理：攻击者伪造地址对服务器进行SYN请求，服务器回应SYN+ACK 而真实的IP地址会认为没有进行发送请求，所以不做回应，服务器没有收到回应，不知道自己发出的包是否成功，就会进行超时重传（默认会进行5次重试）。这样对服务器的内存带宽造成很大的消耗，攻击者如果处在公网，可以伪造IP的话，很难根据IP判断攻击者，给防护带来很大的困难。</p>
+<p>​    解决方法：</p>
+<ul>
+<li>无效连接监视释放</li>
+</ul>
+<p>这种方法不停地监视系统中的半连接和不活跃的连接，当达到一定阈值的时候就拆除这些连接，主动断开请求释放系统资源，这种绝对公平的处理方式也会对正常的请求进行释放。</p>
+<ul>
+<li><p>延缓TCB分配资源<br>SYN洪范攻击主要利用了SYN数据报文一到，系统就给TCB分配资源的特点，所以可以从这里入手，两种方式解决</p>
+<ul>
+<li><p>Syn - Cache技术</p>
+<p>这种技术在收到SYN时候不去分配系统资源，而是先回复ACK报文，并在一个HASH表中保存这种半连接状态的连接，直到收到正确的 ACK 报文再去分配资源</p>
+</li>
+<li><p>Syn - Cookie技术</p>
+<p>Cookie技术完全不使用任何存储资源，它使用一种特殊的算法生成seq num，考虑到双方的IP地址和端口都是固定的，并且对方无法知道自己比较固定的一些信息，如MSS、时间等，所以在收到对方的ACK报文之后，重新计算一遍，看其中是否和对方回应报文中的 <strong>Seq Num - 1</strong> 相同，从而决定是否分配系统资源</p>
+</li>
+</ul>
+</li>
+<li><p>使用SYN Proxy防火墙</p>
+</li>
+</ul>
+<p>原理：对试图穿越的SYN请求进行验证之后才放行</p>
+<hr>
+<h4 id="半连接队列"><a href="#半连接队列" class="headerlink" title="半连接队列"></a>半连接队列</h4><p>服务器在第一次接收到客户端的建立请求SYN报文之后，回复一个SYN ACK包，并且将状态更改为SYN_RECV状态，等待客户端返回ACK包才能完全建立连接，而此时的连接状态被称为服务端的半连接状态，服务器会把这种状态下的请求连接都放入到一个队列当中，把这个队列称之为 <strong>半连接队列</strong> 。</p>
+<p>当然服务端还维护了一个 <strong>全连接队列</strong> ，就是已经完成三次握手的队列，等待进程调用accept（）函数的时候，会把连接从队列中取出来。如果队列满了就可能发生丢包现象，</p>
+<p>SYN-ACK在无法收到响应的数据包的时候会进行重传机制：</p>
+<p>服务端发送完成SYN- ACK 包，如果没有收到客户端的 ACK 确认包，会进行首次重传，等待一段时间还没有收到客户确认包，会进行第二次重传，如果重传次数超过规定限度，系统将会将该链接从半连接队列中删除。</p>
+<p>每次等待的重传时间不一定相同，一般是指数型增长的，如：1s、2s、4s、8s、</p>
+<p><img src="/.com//resend.png" alt="超时重传"></p>
+<hr>
+<h4 id="三次握手可以携带数据么"><a href="#三次握手可以携带数据么" class="headerlink" title="三次握手可以携带数据么"></a>三次握手可以携带数据么</h4><p>第一次和第二次不可以携带数据，第三次握手可以携带数据返回</p>
+<p>前两次握手时还没有确定此次连接的可靠性，无法保证通信双方的发送，接收能力是否正常，如果在此时携带传输数据，不但会使得接收方花费多余的时间，内存空间对报文中的数据进行接收，而且不一定能够传输成功，如果被攻击者利用，在第一次握手中携带大量数据，而不去建立完整的三次握手连接，就会更快的浪费掉服务端的资源，</p>
+<p>所以，第一次第二次不可以，因为这样会使得服务器更容易受到攻击，对于第三次握手，客户端已经建立了ESTABLISHED状态，而且也已知服务端的接收和发送数据能力正常，所以在客户端这边看来传输数据是可以的。</p>
+<hr>
+<h2 id="建立连接之后发起HTTP请求"><a href="#建立连接之后发起HTTP请求" class="headerlink" title="建立连接之后发起HTTP请求"></a>建立连接之后发起HTTP请求</h2><p>封装请求报文：</p>
+<h3 id="结构："><a href="#结构：" class="headerlink" title="结构："></a>结构：</h3><p>请求行、请求头、请求体三个部分组成：</p>
+<ul>
+<li>请求行包含请求方法 、URL 、协议</li>
+</ul>
+<p>请求方法包含 8 种：GET、POST、PUT、DELETE、PATCH、HEAD、OPTIONS、TRACE。</p>
+<p>URL 即请求地址，由 &lt;协议&gt;：//&lt;主机&gt;：&lt;端口&gt;/&lt;路径&gt;?&lt;参数&gt; 组成</p>
+<p>协议版本即 http 版本号</p>
+<ul>
+<li>请求头：由关键字的健值对组成，每行一对、关键字和值之间用英文冒号分隔开。</li>
+<li>请求体：可以承载多个请求参数、数据</li>
+</ul>
+<hr>
+<h3 id="HTTP缓存"><a href="#HTTP缓存" class="headerlink" title="HTTP缓存"></a>HTTP缓存</h3><p>Http 缓存机制作为 web 性能优化的重要手段，当客户端发送第一次请求数据的时候，浏览器没有相应的缓存数据，需要请求服务器，服务器返回之后，需要判断是否开启缓存，将数据存储到缓存中。</p>
+<p><img src="/.com//CacheSimple.png" alt="第一次请求数据"></p>
+<p>或者一个请求发送的时候，如果使用了缓存，缓存运作的整体流程如下</p>
+<p><img src="/.com//cacheProcess.jpg" alt="缓存请求过程"></p>
+<p>缓存分类：</p>
+<ul>
+<li><p><strong>强制缓存：</strong></p>
+<p>不需要发送请求到服务端，直接读取浏览器本地缓存，HTTP状态码为200</p>
+<p>在 Chrome 中，强缓存又分为 <strong>Disk Cache（存放在硬盘中）</strong>和 <strong>Memory Cache（存放在内存中</strong>），存放的位置是由浏览器控制的。<strong>是否强缓存由</strong> <strong>Expires</strong>、<strong>Cache-Control</strong> 和 <strong>Pragma</strong> 3 个 Header 属性共同来控制。</p>
+</li>
+<li><p><strong>对比缓存</strong></p>
+<p>当浏览器的强缓存失效的时候或者请求头中设置了不走强缓存，并且在请求头中设置了 If-Modified-Since 或者 If-None-Match 的时候，会将这两个属性值到服务端去验证是否命中协商缓存，如果命中了协商缓存，会返回 304 状态，加载浏览器缓存，并且响应头会设置 Last-Modified 或者 ETag 属性。</p>
+</li>
+</ul>
+<blockquote>
+<p>我们可以看到两类缓存规则的不同：</p>
+<p><strong>强制缓存如果生效，不需要再和服务器发生交互</strong>，</p>
+<p>而<strong>对比缓存不管是否生效，都需要与服务端发生交互。</strong></p>
+<p>两类缓存规则可以同时存在，<strong>强制缓存优先级高于对比缓存</strong>，也就是说，<strong>当执行强制缓存的规则时，如果缓存生效，直接使用缓存，不再执行对比缓存规则</strong></p>
+</blockquote>
+<hr>
+<h4 id="强制缓存"><a href="#强制缓存" class="headerlink" title="强制缓存"></a>强制缓存</h4><p>已经存在缓存数据的时候，仅基于强制缓存下，请求数据的流程是这样子的：</p>
+<p><img src="/.com//StrongCache.png" alt="强缓存"></p>
+<hr>
+<h4 id="对比缓存"><a href="#对比缓存" class="headerlink" title="对比缓存"></a>对比缓存</h4><p>已经存在缓存数据的手，在基于对比缓存下，请求数据的流程如下：</p>
+<p><img src="/.com//CompareCache.png" alt="对比缓存"></p>
+<hr>
+<h2 id="服务器接收、处理请求"><a href="#服务器接收、处理请求" class="headerlink" title="服务器接收、处理请求"></a>服务器接收、处理请求</h2><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>网络</category>
+      </categories>
+      <tags>
+        <tag>基础</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>类的加载方式</title>
+    <url>/2020/07/07/ClassLoader-Type/</url>
+    <content><![CDATA[<p>当程序使用到某个类的时候需要把其加载到内存中调用，此时 我们知道系统会通过加载，连接，初始化三个阶段来对该类进行初始化。<br>而此时进行类的加载过程中有三种方式，本小记对比一下几种方式的差异</p>
+<a id="more"></a>
+<hr>
+<h2 id="类加载过程："><a href="#类加载过程：" class="headerlink" title="类加载过程："></a>类加载过程：</h2><p><img src="/.com//%E7%B1%BB%E5%8A%A0%E8%BD%BD%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.png" alt="装载过程">   </p>
+<blockquote>
+<p><strong>加载：</strong> 用过类的全限定名获取二进制字节流，将二进制字节流转换成方法区中运行的数据结构，在内存中生成类对象<br><strong>连接：</strong><br> 校验: 导入类或接口的二进制数据的正确性(文件格式验证，元数据验证，字节码验证，符号引用验证)<br> 准备: 给类中的静态变量分配空间并初始化数据，<br> 解析: 将常量池中的符号引用转换成直接引用<br> <strong>初始化:</strong> 激活类的静态变量的初始化Java代码和静态Java代码块，并初始化程序员设置的变量值。</p>
+</blockquote>
+<h2 id="对类的加载方式"><a href="#对类的加载方式" class="headerlink" title="对类的加载方式"></a>对类的加载方式</h2><p><strong>类加载有三种方式：</strong></p>
+<blockquote>
+<ul>
+<li><p>命令行启动应用时候由JVM初始化加载<br></p>
+</li>
+<li><p>通过Class.forName()方法动态加载<br></p>
+</li>
+<li><p>通过ClassLoader.loadClass()方法动态加载</p>
+</li>
+</ul>
+</blockquote>
+<p>下面可以通过一个实例例子查看各个加载方式加载一个含有静态代码块类的输出结果：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CLassLoaderTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ClassNotFoundException </span>&#123;</span><br><span class="line">      ClassLoader loader = Test<span class="class">.<span class="keyword">class</span>.<span class="title">getClassLoader</span>()</span>;</span><br><span class="line">      System.out.println(loader);</span><br><span class="line">      <span class="comment">//使用ClassLoader.loadClass()来加载类，不会执行初始化块</span></span><br><span class="line">      loader.loadClass(<span class="string">"Test"</span>);</span><br><span class="line">      <span class="comment">//使用Class.forName()来加载类，默认会执行初始化块</span></span><br><span class="line">      Class.forName(<span class="string">"Test"</span>);</span><br><span class="line">      <span class="comment">//使用Class.forName()来加载类，并指定ClassLoader，初始化时不执行静态块</span></span><br><span class="line">      Class.forName(<span class="string">"Test"</span>, <span class="keyword">false</span>, loader);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>加载的类：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">"静态初始化块执行了"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果1：</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐结果</div></div><div class="fold">
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sun.misc.Launcher$AppClassLoader@18b4aac2</span><br></pre></td></tr></table></figure>
+</div></div>
+<p>输出结果2：</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐结果</div></div><div class="fold">
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sun.misc.Launcher$AppClassLoader@18b4aac2</span><br><span class="line">静态初始化块执行了</span><br></pre></td></tr></table></figure>
+</div></div>
+<p>输出结果3：</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐结果</div></div><div class="fold">
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sun.misc.Launcher$AppClassLoader@18b4aac2</span><br></pre></td></tr></table></figure>
+</div></div>
+
+<h2 id="加载方式的区别"><a href="#加载方式的区别" class="headerlink" title="加载方式的区别"></a>加载方式的区别</h2><p> Class.forName(className)方法，内部实际调用的方法是  Class.forName(className,true,classloader);</p>
+<p> 第2个boolean参数表示类是否需要初始化，  Class.forName(className)默认是需要初始化。一旦初始化，就会触发目标对象的 static块代码执行，static参数也也会被再次初始化。<br><strong>源码：</strong><br> <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@CallerSensitive</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Class&lt;?&gt; forName(String name, <span class="keyword">boolean</span> initialize,</span><br><span class="line">                                   ClassLoader loader)</span><br><span class="line">        <span class="keyword">throws</span> ClassNotFoundException</span><br><span class="line">    &#123;</span><br><span class="line">        Class&lt;?&gt; caller = <span class="keyword">null</span>;</span><br><span class="line">        SecurityManager sm = System.getSecurityManager();</span><br><span class="line">        <span class="keyword">if</span> (sm != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// Reflective call to get caller class is only needed if a security manager</span></span><br><span class="line">            <span class="comment">// is present.  Avoid the overhead of making this call otherwise.</span></span><br><span class="line">            caller = Reflection.getCallerClass();</span><br><span class="line">            <span class="keyword">if</span> (sun.misc.VM.isSystemDomainLoader(loader)) &#123;</span><br><span class="line">                ClassLoader ccl = ClassLoader.getClassLoader(caller);</span><br><span class="line">                <span class="keyword">if</span> (!sun.misc.VM.isSystemDomainLoader(ccl)) &#123;</span><br><span class="line">                    sm.checkPermission(</span><br><span class="line">                        SecurityConstants.GET_CLASSLOADER_PERMISSION);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> forName0(name, initialize, loader, caller);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p> ClassLoader.loadClass(className)方法，内部实际调用的方法是  ClassLoader.loadClass(className,false);</p>
+<p> 第2个 boolean参数，表示目标对象是否进行链接，false表示不进行链接，由上面介绍可以，不进行链接意味着不进行包括初始化等一系列步骤，那么静态块和静态对象就不会得到执行<br><strong>源码：</strong><br> <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> Class&lt;?&gt; loadClass(String name) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">      <span class="keyword">return</span> loadClass(name, <span class="keyword">false</span>);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>Java</category>
+        <category>JVM</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>JVM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ClassLoader</title>
+    <url>/2020/06/03/ClassLoader/</url>
+    <content><![CDATA[<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>Java</category>
+        <category>JVM</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>JVM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>剖析Java中的装箱和拆箱</title>
+    <url>/2020/04/26/Boxing/</url>
+    <content><![CDATA[<p>Java中的基本类型都有对应的包装类型，基本类型与其对应的包装类型之间的赋值使用自动装箱与拆箱完成。<br>自动装箱和拆箱问题是Java中一个能够经常遇到的问题，今天主要先讲述装箱和拆箱的基本内容以及实现原理，另外找了一些面试题中会遇到的与装箱、拆箱相关的问题。</p>
+<a id="more"></a>
+<h2 id="什么是拆箱、什么是装箱"><a href="#什么是拆箱、什么是装箱" class="headerlink" title="什么是拆箱、什么是装箱?"></a>什么是拆箱、什么是装箱?</h2><blockquote>
+<p><strong>装箱</strong>：基本类型转变为包装器类型的过程。<br><strong>拆箱</strong>：包装器类型转变为基本类型的过程。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer x = <span class="number">2</span>;  <span class="comment">//装箱 调用Integer.valueOf(2)</span></span><br><span class="line"><span class="keyword">int</span> y = x;      <span class="comment">//拆箱 调用x。intValue()</span></span><br></pre></td></tr></table></figure>
+
+<p>Java为每一种基本数据类型都提供了响应的包装器类型，在之前如果想要生成一个数值为50的Interger对象，需要写如下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer i = <span class="keyword">new</span> Integer(<span class="number">50</span>);</span><br></pre></td></tr></table></figure>
+<p>但我们知道从Java SE5开始提供自动装箱的特性 上述生成50的Integer对象现在也可以这么写：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer i = <span class="number">50</span>;</span><br></pre></td></tr></table></figure>
+<p>这个过程能够自动根据书局创建对应的Integer对象，这是装箱<br>对应的拆箱、就是自动将包装器类型转换为基本数据类型：</p>
+<p>下面是基础数据类型对应的包装器类型：</p>
+<table>
+<thead>
+<tr>
+<th align="center">基础类型</th>
+<th align="center">包装 器类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">int(4字节)</td>
+<td align="center">Integer</td>
+</tr>
+<tr>
+<td align="center">byte（1字节）</td>
+<td align="center">Byte</td>
+</tr>
+<tr>
+<td align="center">short（2字节）</td>
+<td align="center">Short</td>
+</tr>
+<tr>
+<td align="center">long（8字节）</td>
+<td align="center">Long</td>
+</tr>
+<tr>
+<td align="center">float（4字节）</td>
+<td align="center">Float</td>
+</tr>
+<tr>
+<td align="center">double（8字节）</td>
+<td align="center">Double</td>
+</tr>
+<tr>
+<td align="center">char（2字节）</td>
+<td align="center">Character</td>
+</tr>
+<tr>
+<td align="center">boolean（未定）</td>
+<td align="center">Boolean</td>
+</tr>
+</tbody></table>
+<h2 id="拆箱、装箱具体如何实现"><a href="#拆箱、装箱具体如何实现" class="headerlink" title="拆箱、装箱具体如何实现"></a>拆箱、装箱具体如何实现</h2><p>以Integer类为例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IntegerTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Integer x = <span class="number">10</span>;</span><br><span class="line">        <span class="keyword">int</span> y = x;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用javap指令反编译class文件之后可见内容如下<br><img src="/.com//javap.png" alt="字节码"></p>
+<p>从反编译得到的字节码内容可以看出，在装箱的时候自动调用的是Integer的valueOf(int)方法。而在拆箱的时候自动调用的是Integer的intValue方法。</p>
+<p>其他类型的拆箱装箱调用方法也类似</p>
+<p>因此装箱和拆箱的实现过程可以说：</p>
+<blockquote>
+<p>装箱过程是通过调用包装器的 <strong>valueOf()</strong> 方法实现的<br>而拆箱过程是通过调用包装器的 <strong>xxxValue()</strong> 方法实现的<br>(xxx代表对应的基本数据类型)</p>
+</blockquote>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><ul>
+<li>整型的包装类 valueOf 方法返回对象时，在常用的取值范围内，会返回缓存对象。</li>
+<li>浮点型的包装类 valueOf 方法返回新的对象。</li>
+<li>布尔型的包装类 valueOf 方法 Boolean类的静态常量 TRUE | FALSE。</li>
+<li>包含算术运算会触发自动拆箱。</li>
+<li>存在大量自动装箱的过程，如果装箱返回的包装对象不是从缓存中获取，会创建很多新的对象，比较消耗内存。</li>
+</ul>
+<hr>
+<p><strong>实验代码1：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Integer i1 = <span class="number">100</span>;</span><br><span class="line">        Integer i2 = <span class="number">100</span>;</span><br><span class="line">        Integer i3 = <span class="number">200</span>;</span><br><span class="line">        Integer i4 = <span class="number">200</span>;</span><br><span class="line"></span><br><span class="line">        System.out.println(i1==i2);</span><br><span class="line">        System.out.println(i3==i4);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码执行会输出什么？结果如下：</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐结果</div></div><div class="fold">
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">true</span><br><span class="line">false</span><br></pre></td></tr></table></figure>
+</div></div>
+<p>原因分析：<br>输出结果表明i1和i2指向的是同一个对象，而i3和i4指向的是不同的对象。<br>此时来看一下调用的Integer的valueOf方法源码：</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐valueOf方法源码</div></div><div class="fold">
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Integer <span class="title">valueOf</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)</span><br><span class="line">            <span class="keyword">return</span> IntegerCache.cache[i + (-IntegerCache.low)];</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Integer(i);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</div></div>
+<p>其中IntegerCache类的实现类如下：</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐IntegerCache类源码</div></div><div class="fold">
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">IntegerCache</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> low = -<span class="number">128</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> high;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> Integer cache[];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="comment">// high value may be configured by property</span></span><br><span class="line">        <span class="keyword">int</span> h = <span class="number">127</span>;</span><br><span class="line">        String integerCacheHighPropValue =</span><br><span class="line">            sun.misc.VM.getSavedProperty(<span class="string">"java.lang.Integer.IntegerCache.high"</span>);</span><br><span class="line">        <span class="keyword">if</span> (integerCacheHighPropValue != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">int</span> i = parseInt(integerCacheHighPropValue);</span><br><span class="line">                i = Math.max(i, <span class="number">127</span>);</span><br><span class="line">                <span class="comment">// Maximum array size is Integer.MAX_VALUE</span></span><br><span class="line">                h = Math.min(i, Integer.MAX_VALUE - (-low) -<span class="number">1</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span>( NumberFormatException nfe) &#123;</span><br><span class="line">                <span class="comment">// If the property cannot be parsed into an int, ignore it.</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        high = h;</span><br><span class="line"></span><br><span class="line">        cache = <span class="keyword">new</span> Integer[(high - low) + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">int</span> j = low;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> k = <span class="number">0</span>; k &lt; cache.length; k++)</span><br><span class="line">            cache[k] = <span class="keyword">new</span> Integer(j++);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// range [-128, 127] must be interned (JLS7 5.1.7)</span></span><br><span class="line">        <span class="keyword">assert</span> IntegerCache.high &gt;= <span class="number">127</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">IntegerCache</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</div></div>
+<p><strong>结论如下：</strong></p>
+<blockquote>
+<p>在通过valueOf方法创建Integer对象的时候，如果数值在[-128,127]之间，便返回指向IntegerCache.cache中已经存在的对象的引用；否则创建一个新的Integer对象。<br>上面的代码中i1和i2的数值为100，因此会直接从cache中取已经存在的对象，所以i1和i2指向的是同一个对象，而i3和i4则是分别指向不同的对象。</p>
+</blockquote>
+<hr>
+<p><strong>实验代码2：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Double i1 = <span class="number">100.0</span>;</span><br><span class="line">Double i2 = <span class="number">100.0</span>;</span><br><span class="line">Double i3 = <span class="number">200.0</span>;</span><br><span class="line">Double i4 = <span class="number">200.0</span>;</span><br><span class="line"></span><br><span class="line">System.out.println(i1==i2);</span><br><span class="line">System.out.println(i3==i4);</span><br></pre></td></tr></table></figure>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐结果</div></div><div class="fold">
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">false</span><br><span class="line">false</span><br></pre></td></tr></table></figure>
+</div></div>
+<p>这是因为Double类的valueOf实现方法返回的是新的对象,在某个范围内的整型数值的个数是有限的，而浮点数却不是.<br>下面是 <strong>valueOf()</strong> 方法实现：</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐valueOf方法源码</div></div><div class="fold">
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Double <span class="title">valueOf</span><span class="params">(<span class="keyword">double</span> d)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> Double(d);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+</div></div>
+<blockquote>
+<p>　<strong>注意</strong> :<br>Integer、Short、Byte、Character、Long这几个类的valueOf方法的实现是类似的.<br>Double、Float的valueOf方法的实现是类似的。</p>
+</blockquote>
+<hr>
+<p><strong>实验代码3：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Boolean b1 = <span class="keyword">false</span>;</span><br><span class="line">Boolean b2 = <span class="keyword">false</span>;</span><br><span class="line">Boolean b3 = <span class="keyword">true</span>;</span><br><span class="line">Boolean b4 = <span class="keyword">true</span>;</span><br><span class="line">System.out.println(b1 == b2);<span class="comment">//true</span></span><br><span class="line">System.out.println(b3 == b4);<span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐结果</div></div><div class="fold">
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">true</span><br><span class="line">true</span><br></pre></td></tr></table></figure>
+</div></div>
+<p>同样先看源码方法<br>下面是 <strong>valueOf()</strong> 方法实现：</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐valueOf方法源码</div></div><div class="fold">
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Boolean <span class="title">valueOf</span><span class="params">(<span class="keyword">boolean</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (b ? TRUE : FALSE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</div></div>
+<p>其中TRUE和FALSE是在Boolean中定义的两个静态成员属性</p>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐TRUE、FALSE</div></div><div class="fold">
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Boolean TRUE = <span class="keyword">new</span> Boolean(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  * The &#123;<span class="doctag">@code</span> Boolean&#125; object corresponding to the primitive</span></span><br><span class="line"><span class="comment">  * value &#123;<span class="doctag">@code</span> false&#125;.</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Boolean FALSE = <span class="keyword">new</span> Boolean(<span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+</div></div>
+<p>所以输出都是为True</p>
+<hr>
+<p><strong>实验代码4：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer s1 = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">long</span> t1 = System.currentTimeMillis();</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt;<span class="number">1000</span> * <span class="number">10000</span>; i++)&#123;</span><br><span class="line">    s1 += i;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">long</span> t2 = System.currentTimeMillis();</span><br><span class="line">System.out.println(<span class="string">"使用Integer，递增相加耗时："</span> + (t2 - t1));<span class="comment">//使用Integer，递增相加耗时：114</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> s2 = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">long</span> t3 = System.currentTimeMillis();</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt;<span class="number">1000</span> * <span class="number">10000</span>; i++)&#123;</span><br><span class="line">    s2 += i;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">long</span> t4 = System.currentTimeMillis();</span><br><span class="line">System.out.println(<span class="string">"使用int，递增相加耗时："</span> + (t4 - t3));<span class="comment">//使用int，递增相加耗时：8</span></span><br></pre></td></tr></table></figure>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐输出结果</div></div><div class="fold">
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">使用Integer，递增相加耗时：<span class="number">114</span></span><br><span class="line">使用Integer，递增相加耗时：<span class="number">8</span></span><br></pre></td></tr></table></figure>
+</div></div>
+<p>原因：在运算中发生了大量的自动装箱拆箱的过程 会消耗内存增加运行时间。</p>
+<hr>
+<p><strong>实验代码5：</strong><br>下面程序输出结果是什么？</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Integer a = <span class="number">1</span>;</span><br><span class="line">        Integer b = <span class="number">2</span>;</span><br><span class="line">        Integer c = <span class="number">3</span>;</span><br><span class="line">        Integer d = <span class="number">3</span>;</span><br><span class="line">        Integer e = <span class="number">321</span>;</span><br><span class="line">        Integer f = <span class="number">321</span>;</span><br><span class="line">        Long g = <span class="number">3L</span>;</span><br><span class="line">        Long h = <span class="number">2L</span>;</span><br><span class="line"></span><br><span class="line">        System.out.println(c==d);</span><br><span class="line">        System.out.println(e==f);</span><br><span class="line">        System.out.println(c==(a+b));</span><br><span class="line">        System.out.println(c.equals(a+b));</span><br><span class="line">        System.out.println(g==(a+b));</span><br><span class="line">        System.out.println(g.equals(a+b));</span><br><span class="line">        System.out.println(g.equals(a+h));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中</p>
+<blockquote>
+<p>当 “==”运算符的两个操作数都是 包装器类型的引用，则是比较指向的是否是同一个对象，<br>而如果其中有一个操作数是表达式（即包含算术运算）则比较的是数值（即会触发自动拆箱的过程）。<br>另外，对于包装器类型，equals方法并不会进行类型转换。</p>
+</blockquote>
+<div><div class="fold_hider"><div class="close hider_title">点击显/隐输出结果</div></div><div class="fold">
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">true</span></span><br><span class="line"><span class="keyword">false</span></span><br><span class="line"><span class="keyword">true</span></span><br><span class="line"><span class="keyword">true</span></span><br><span class="line"><span class="keyword">true</span></span><br><span class="line"><span class="keyword">false</span></span><br><span class="line"><span class="keyword">true</span></span><br></pre></td></tr></table></figure>
+</div></div>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java浮点数精度丢失问题</title>
+    <url>/2020/03/13/Floatat-precision/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在练手一个电商项目，遇到一个之前听到过的问题，但原来并没有在意，就是 <strong><font color="#FF4500">Float数值运算时精度丢失问题</font></strong><br>其实为什么会发生这个问题，确实也挺有意思的，这就关系到 <strong><font color="#FF4500">IEEE-754浮点数表示法</font></strong> 这个概念了。<br>本篇博客就再复习一遍这个概念，同时记录下如何解决这一问题。</p>
+<a id="more"></a>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在写电商项目中会有很多关于价格计算并显示的过程。但在测试的时候发现 浮点数计算精度出现了问题导致有关的模块都出现问题：<br><strong>场景</strong></p>
+<blockquote>
+</blockquote>
+<p>学校大一的时候开设了一门“计算机结构”的课 用的教材是 <strong><font color="#FF4500">深入理解计算机系统(CSAPP)</font></strong> 里面第二章很细致的讲了这个东西<br>主要  </p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>项目踩坑</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>LeetCode_121.买卖股票的最佳时机</title>
+    <url>/2020/03/11/LeetCode-121/</url>
+    <content><![CDATA[<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。</p>
+<p>如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。</p>
+<p>注意你不能在买入股票前卖出股票。</p>
+<a id="more"></a>
+<h3 id="示例1："><a href="#示例1：" class="headerlink" title="示例1："></a>示例1：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">输入: [7,1,5,3,6,4]</span><br><span class="line">输出: 5</span><br><span class="line">解释: 在第 2 天（股票价格 &#x3D; 1）的时候买入   </span><br><span class="line">      在第 5 天（股票价格 &#x3D; 6）的时候卖出，最大利润 &#x3D; 6-1 &#x3D; 5 。</span><br><span class="line">      注意利润不能是 7-1 &#x3D; 6, 因为卖出价格需要大于买入价格。</span><br></pre></td></tr></table></figure>
+<h3 id="示例2"><a href="#示例2" class="headerlink" title="示例2:"></a>示例2:</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">输入: [7,6,4,3,1]</span><br><span class="line">输出: 0</span><br><span class="line">解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。</span><br></pre></td></tr></table></figure>
+<h2 id="题解："><a href="#题解：" class="headerlink" title="题解："></a>题解：</h2><h3 id="方法1：暴力"><a href="#方法1：暴力" class="headerlink" title="方法1：暴力"></a>方法1：暴力</h3><p><strong>思路</strong><br>emmm 找最小 那就先每个都比较一下 纯暴力解法<br>循环嵌套 遍历数组 计算每一次买入卖出的利润<br>比较所有利润 返回最大的<br><strong>算法</strong>   </p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public class Solution &#123;</span><br><span class="line">    public int maxProfit(int prices[]) &#123;</span><br><span class="line">        int result &#x3D; 0;</span><br><span class="line">        for (int i &#x3D; 0; i &lt; prices.length - 1; i++) &#123;</span><br><span class="line">            for (int j &#x3D; i + 1; j &lt; prices.length; j++) &#123;</span><br><span class="line">                int profit &#x3D; prices[j] - prices[i];</span><br><span class="line">                if (profit &gt; result)</span><br><span class="line">                    result &#x3D; profit;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>分析</strong></p>
+<ul>
+<li>时间复杂度：O(n^2) 冒泡排序</li>
+<li>空间复杂度：O(1) 常量级别</li>
+</ul>
+<h3 id="方法2：DP-单循环存值"><a href="#方法2：DP-单循环存值" class="headerlink" title="方法2：DP:单循环存值"></a>方法2：DP:单循环存值</h3><p><strong>思路</strong><br>很容易想，动态规划的思想 for循环遍历数组</p>
+<ul>
+<li>记下「当天的最小值」</li>
+<li>比较「当天价格，之前最小值」，计算「之前买入，当天卖出所获利」</li>
+<li>比较「每天获利大小」 返回最终最大的</li>
+</ul>
+<blockquote>
+<p>定义两个常量 存值</p>
+</blockquote>
+<ol>
+<li>一个存最小价格(用于计算每天卖出获利)</li>
+<li>一个存获利情况(最终返回)</li>
+</ol>
+<p><strong>算法</strong>   </p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="keyword">int</span>[] prices)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(prices.length &lt;= <span class="number">1</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> buyPrice = prices[<span class="number">0</span>];<span class="comment">//最小值</span></span><br><span class="line">        <span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span> ;i &lt; prices.length; i++ )&#123;</span><br><span class="line">            buyPrice = Math.min(buyPrice,prices[i]);</span><br><span class="line">            result = Math.max(prices[i]-buyPrice,result);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>分析</strong>   </p>
+<ul>
+<li>时间复杂度：O(n) 单循环遍历</li>
+<li>空间复杂度：O(1) 常量级别</li>
+</ul>
+<h2 id="更多题解详见："><a href="#更多题解详见：" class="headerlink" title="更多题解详见："></a>更多题解详见：</h2><p><a href="https://www.macchac.com/2020/03/10/LeetCode-ALL/" target="_blank" rel="noopener">LeetCode 个人题解汇总(持续更新….)</a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>LeetCode 个人题解汇总(持续更新....)</title>
+    <url>/2020/03/10/LeetCode-ALL/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>原来一直没有刷题的习惯 ，而且算法一直是我特别薄弱的地方，下定决心死磕一下算法，<br>记录此帖也算是立一个flag吧..<br>从LeetCode上简单的题刷起，并记录给的解法以及自己对该题的一些理解和根据解题思路Coding出简洁一点的代码。</p>
+<a id="more"></a>
+<hr>
+<h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2><table>
+<thead>
+<tr>
+<th align="center">题号</th>
+<th align="center">题目名</th>
+<th align="center">难度</th>
+<th align="center">通过率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">70</td>
+<td align="center"><a href="https://www.macchac.com/2020/03/10/LeetCode-70/" target="_blank" rel="noopener">爬楼梯</a></td>
+<td align="center">简单</td>
+<td align="center">48.0%</td>
+</tr>
+<tr>
+<td align="center">121</td>
+<td align="center"><a href="https://www.macchac.com/2020/03/11/LeetCode-121/" target="_blank" rel="noopener">买卖股票的最佳时机</a></td>
+<td align="center">简单</td>
+<td align="center">53.6%</td>
+</tr>
+</tbody></table>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>LeetCode_70.Climbing Stairs 爬楼梯</title>
+    <url>/2020/03/10/LeetCode-70/</url>
+    <content><![CDATA[<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>假设你正在爬楼梯。需要 n 阶你才能到达楼顶。</p>
+<p>每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？</p>
+<p>注意：给定 n 是一个正整数。</p>
+<a id="more"></a>
+
+<h3 id="示例1："><a href="#示例1：" class="headerlink" title="示例1："></a>示例1：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">输入： 2   </span><br><span class="line">输出： 2   </span><br><span class="line">解释： 有两种方法可以爬到楼顶。</span><br><span class="line">1.  1 阶 + 1 阶</span><br><span class="line">2.  2 阶</span><br></pre></td></tr></table></figure>
+<h3 id="示例2"><a href="#示例2" class="headerlink" title="示例2:"></a>示例2:</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">输入： 3   </span><br><span class="line">输出： 3   </span><br><span class="line">解释： 有三种方法可以爬到楼顶。</span><br><span class="line">1.  1 阶 + 1 阶 + 1 阶</span><br><span class="line">2.  1 阶 + 2 阶</span><br><span class="line">3.  2 阶 + 1 阶</span><br></pre></td></tr></table></figure>
+
+<h2 id="题解："><a href="#题解：" class="headerlink" title="题解："></a>题解：</h2><h3 id="方法1：递归-自顶向下"><a href="#方法1：递归-自顶向下" class="headerlink" title="方法1：递归 自顶向下"></a>方法1：递归 自顶向下</h3><blockquote>
+<p>PS：(暴力但并不可取)</p>
+</blockquote>
+<p><strong>思路</strong><br>这个题看第一眼的时候觉得不知道是哪种题，手算了两个之后发现其实跟斐波那契数列很相似：</p>
+<blockquote>
+<p>假设梯子有n层，每次只能爬 1 或者 2 层，<br>那么爬到顶的方法要么是<br>1，从第 n-1层 爬 1 层登顶<br>2，从第 n-2 层 爬 2层 登顶<br>两种方法相加就是爬到顶的所有方法<br>所以递推一下就有<br>S(n) = S(n-1) + S(n-2)<br>这个基础思路<br>且S(n)是个分段函数 当 n=1 或者 n=2 的时候有直接结果返回 只有当 n&gt;2 的时候才有递推公式</p>
+</blockquote>
+<p><strong>算法</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">climbStairs</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (n == <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">      <span class="keyword">if</span> (n == <span class="number">2</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">      <span class="keyword">return</span> climbStairs(n-<span class="number">1</span>) + climbStairs(n-<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析</strong></p>
+<ul>
+<li>时间复杂度(2^n):二叉树形式 指数阶   </li>
+<li>空间复杂度O(1):使用常量空间   </li>
+</ul>
+<p>这种方法直接，但是因为采用递归，会产生很多重复的计算：<br>比如当n=5时<br>想要计算 S(5) 就要知道 S(4) 和 S(3)<br>想要计算 S(4)/S(3) 就要计算S(3)/S(2)….<br>这里看出 递归树中S(4)下面的子树 包含了S(3)这个树的所有计算内容<br>当n越来越大时 重复计算了相当多的数据 必然会造成时间浪费<br>时间复杂度为O(2^n)<br>拿到OJ上跑 也是显示 <strong><font color="#FF4500"> Time Limit Exceeded</font></strong> 运行超时</p>
+<h3 id="方法2：优化递归-尾递归"><a href="#方法2：优化递归-尾递归" class="headerlink" title="方法2：优化递归 尾递归"></a>方法2：优化递归 尾递归</h3><blockquote>
+<p>PS：(方法一的优化版本)可能比较抽象</p>
+</blockquote>
+<p><strong>思路</strong><br>因为方法1 的算法运行超时 直接原因是重复的计算过多<br>那我们如果倒过来想 增加一个额外计数器的概念，记录一下需要经过多少次计算，并设置一下结束递归条件，把多余的计算过程都省去，时间上便可以得到优化<br>继续使用方法1中的递归算法：</p>
+<blockquote>
+<p>假设梯子有6层 n=6<br>因为当n=1时候 可以直接知道只有 1 种情况<br>当 n=2 时候 可以直接知道只有 2 种情况<br>每进行一次计算 n 减 1<br>1，当n=6时候 计算第一个需要计算的层数:S(3)=1+2 计算之后n-1=5<br>2，当n=5时候 计算第二个需要计算的层数:S(4)=S(3)+2 计算之后n-1=4<br>3，当n=4时候 计算第三个需要计算的层数:S(5)=S(4)+S(3) 计算之后n-1=3<br>4，当n=3时候 计算第四个需要计算的层数:S(6)=S(5)+S(4) 计算之后n-1=2<br>5，因为到这里 第二层的方法次数不需要计算 直接知道有2种 所以把 n=2时 设置成结束递归条件</p>
+</blockquote>
+<p>从例子中看出每次计算直接可以用到上一次计算的结果 不需要重复进行多余的运算 但是想法可能有点绕 开始Coding…</p>
+<p><strong>算法</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">climbStairs</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> climb(n,<span class="number">1</span>,<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">climb</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">int</span> n1,<span class="keyword">int</span> n2)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> n1;</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">2</span>)</span><br><span class="line">            <span class="keyword">return</span> n2;</span><br><span class="line">        <span class="keyword">return</span> climb(--n, n2, n1 + n2);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>分析</strong></p>
+<ul>
+<li>时间复杂度O(n):需要计算n个数值 线性阶   </li>
+<li>空间复杂度O(1):使用常量空间</li>
+</ul>
+<p>主要是一个加入计数器的思想思路<br>n1 n2 代表计算的两个值 最初带入 1 和 2<br>每次计算结束后如果还需要计算则变换参与计算的值,不需要计算时 返回最终计算的出的那个值就可以(n2)</p>
+<h3 id="方法3：循环计算"><a href="#方法3：循环计算" class="headerlink" title="方法3：循环计算"></a>方法3：循环计算</h3><p><strong>思路</strong><br>换种思路 递归说到底，就是自己调用自己，是一种无穷迭代思维方式，简单粗暴的罗列。递归对程序员的修养要求极高，能不用就尽量别用。<br>设一个存值变量使用循环进行运算</p>
+<p><strong>算法</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">climbStairs</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">int</span> n1 = <span class="number">1</span>;</span><br><span class="line">      <span class="keyword">int</span> n2 = <span class="number">2</span>;</span><br><span class="line">      <span class="keyword">int</span> temp;</span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; n ; i++) &#123;</span><br><span class="line">          temp = n2;</span><br><span class="line">          n2 = n1 + n2;</span><br><span class="line">          n1 = temp;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> n&lt;=<span class="number">2</span> ? n : n2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>分析</strong></p>
+<ul>
+<li>时间复杂度O(n):单循环到n 需要计算n个数值</li>
+<li>空间复杂度O(1):使用常量空间</li>
+</ul>
+<h3 id="方法4：数学公式"><a href="#方法4：数学公式" class="headerlink" title="方法4：数学公式"></a>方法4：数学公式</h3><p><strong>思路</strong><br>这个我打死也想不到 我是看题解才知道 其实斐波那契数列是可以求出通项公式的，<br>推理的过程请参见 知乎上的这个贴子，那么有了通项公式后，直接在常数级的时间复杂度范围内就可以求出结果了<br>只能说 数学才是算法的艺术核心啊。<br>参见代码如下：</p>
+<p><strong>算法</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">climbStairs</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">double</span> sqrt5=Math.sqrt(<span class="number">5</span>);</span><br><span class="line">        <span class="keyword">double</span> fibn=Math.pow((<span class="number">1</span>+sqrt5)/<span class="number">2</span>,n+<span class="number">1</span>)-Math.pow((<span class="number">1</span>-sqrt5)/<span class="number">2</span>,n+<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">int</span>)(fibn/sqrt5);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>分析</strong></p>
+<ul>
+<li>时间复杂度O(log(n)):pow 方法将会用去 log(n)的时间。</li>
+<li>空间复杂度O(1): 使用常量级空间。</li>
+</ul>
+<h2 id="更多题解详见："><a href="#更多题解详见：" class="headerlink" title="更多题解详见："></a>更多题解详见：</h2><p><a href="https://www.macchac.com/2020/03/10/LeetCode-ALL/" target="_blank" rel="noopener">LeetCode 个人题解汇总(持续更新….)</a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>备份Hexo博客</title>
+    <url>/2020/02/15/%E5%A4%87%E4%BB%BDHexo%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h2 id="一：前言"><a href="#一：前言" class="headerlink" title="一：前言"></a>一：前言</h2><p>一开始接触Hexo搭建博客之后，觉得特别好使，尤其是用到的Hexo+Next，个性化东西还是挺丰富的，但是最麻烦的是源文件都是存放在本地的，是用Hexo+Github搭建只是默认把渲染生成的静态网页文件上传到github上，并没有解决Hexo源文件问题。<br>我因为坏过一次硬盘，没有备份源文件，相当于白给了导致只能重新搭建博客。<br>所以这次搭好博客之后，做的第一件事就是想办法把源文件资源备份下来<br>记录手动备份Hexo博客源文件的过程…</p>
+<a id="more"></a>
+<hr>
+<h2 id="二：方法"><a href="#二：方法" class="headerlink" title="二：方法"></a>二：方法</h2><h3 id="想到的办法两种-其实不就是一种吗"><a href="#想到的办法两种-其实不就是一种吗" class="headerlink" title="想到的办法两种(其实不就是一种吗)"></a>想到的办法两种(其实不就是一种吗)</h3><ul>
+<li>拷贝到U盘或者移动存储设备中(还用你说？)   </li>
+<li>把源文件也托管到Github平台上</li>
+</ul>
+<h3 id="Git指令："><a href="#Git指令：" class="headerlink" title="Git指令："></a>Git指令：</h3><ul>
+<li>git init //初始化仓库</li>
+<li>git add .(文件name) //添加文件到暂存区</li>
+<li>git commit -m “message” //添加本次提交描述信息</li>
+<li>git remote add origin + url //链接远程仓库，创建主分支</li>
+<li>git pull –rebase origin master // 把本地仓库的变化连接到远程仓库主分支</li>
+<li>git push origin master //把本地仓库的文件推送到远程仓库</li>
+</ul>
+<h2 id="三：备份"><a href="#三：备份" class="headerlink" title="三：备份"></a>三：备份</h2><h3 id="新建仓库"><a href="#新建仓库" class="headerlink" title="新建仓库"></a>新建仓库</h3><p>在你的Github中创建一个新的空的repository 取名为 <strong><font color="#FF4500">(Github用户名)+github.io</font></strong> (Github Page统一命名)如果博客搭在自己的服务器上那就随便起  </p>
+<h3 id="创建本地仓库"><a href="#创建本地仓库" class="headerlink" title="创建本地仓库"></a>创建本地仓库</h3><p>打开本地博客文件夹，进入Git bash界面，执行命令创建仓库</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git init</span><br></pre></td></tr></table></figure>
+<h3 id="修改-gitignore文件"><a href="#修改-gitignore文件" class="headerlink" title="修改.gitignore文件"></a>修改.gitignore文件</h3><p>一般安装hexo博客的时候会自己带有.gitignore文件<br>如果没有请手动创建一个，在里面加入<em>.log 和 public/ 以及.deploy</em>/ 。因为每次执行hexo g命令时，上述目录都会被重写更新。因此忽略这两个目录下的文件更新，加快push速度。<br>注：如果自带的gitignore文件中有 直接进行下一步：</p>
+<h3 id="设置远程仓库地址"><a href="#设置远程仓库地址" class="headerlink" title="设置远程仓库地址"></a>设置远程仓库地址</h3><p>如果你之前创建仓库的时候不为空,直接进行添加远程仓库会失败</p>
+<p>(勾选了 Initialize this repository with a README这项  需要先删除远程Git仓库:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git remote rm origin</span><br></pre></td></tr></table></figure>
+<p>然后添加远程Git仓库（正常为空则可跳过上一个步骤）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git remote add origin + (你的博客仓库ssh地址或https地址)</span><br></pre></td></tr></table></figure>
+<p><img src="/.com//remote.png" alt="remote"><br>之后创建新的分支hexo 用来存放源文件</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git branch hexo</span><br></pre></td></tr></table></figure>
+<p>此时有两个分支:</p>
+<ul>
+<li>默认master用于发布静态网页博客文件</li>
+<li>hexo分支用于存放博客源文件   </li>
+</ul>
+<p>（可以查看一下当前分支）:<br><img src="/.com//branch.png" alt="branch"></p>
+<h3 id="分支管理"><a href="#分支管理" class="headerlink" title="分支管理"></a>分支管理</h3><p><strong>master</strong><br>master分支的文件则需要Hexo进行管理，编辑 <strong><font color="#FF4500">_config.yml</font></strong>  站点配置文件，设置branch为master<br><img src="/.com//deploy.png" alt="deploy"></p>
+<h3 id="提交Hexo源码"><a href="#提交Hexo源码" class="headerlink" title="提交Hexo源码"></a>提交Hexo源码</h3><p>执行以下命令，完成Hexo源文件在本地的提交</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">$ git commit -m &quot;添加Hexo源码文件做备份&quot;</span><br><span class="line">$ git push origin hexo</span><br></pre></td></tr></table></figure>
+<h3 id="将博客静态文件推送到master分支"><a href="#将博客静态文件推送到master分支" class="headerlink" title="将博客静态文件推送到master分支"></a>将博客静态文件推送到master分支</h3><p>保证当前还在默认的master分支下(可以git status查看一下当前状态)</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ hexo clean   # 如果配置文件没有更改，忽略该命令</span><br><span class="line">$ hexo g -d</span><br></pre></td></tr></table></figure>
+<p>在github上可以看到hexo分支如下：<br><img src="/.com//git_hexo.png" alt="git_hexo"><br>master分支仍然是静态博客文件</p>
+<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p>如果之后完成新的博客之后 需要把原本Git仓库中的源文件更新</p>
+<p>重复步骤6和7即可 顺序无所谓</p>
+<h2 id="四：迁移"><a href="#四：迁移" class="headerlink" title="四：迁移"></a>四：迁移</h2><p>如果换了电脑继续维护博客或者存储文件损坏<br>这时候直接把之前备份过的源文件分支就可以用来恢复了：   </p>
+<ul>
+<li>安装git   </li>
+<li>安装Nodejs和npm</li>
+<li>使用 git clone -b + (博客仓库的HTTPS或者SSH路径) 将仓库拷贝到本地</li>
+<li>在文件夹中使用:<br> npm install hexo-cli -g<br> npm install deployer-git   </li>
+<li>等命令安装hexo相关的依赖就可以了</li>
+</ul>
+<p>这样就可以做到将hexo博客备份迁移的工作</p>
+<p>不过每次发表新的文章还是要更新一下Git中的hexo分支保持同步(养成良好习惯)</p>
+<h2 id="五：说明"><a href="#五：说明" class="headerlink" title="五：说明"></a>五：说明</h2><p><strong>hexo源文件</strong><br>解释一下为什么gitignore文件中忽略那些文件：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">_config.yml   站点的配置文件，需要拷贝</span><br><span class="line"> themes&#x2F;      主题文件夹，需要拷贝</span><br><span class="line">source        博客文章的 .md 文件，需要拷贝</span><br><span class="line">scaffolds&#x2F;    文章的模板，需要拷贝</span><br><span class="line">package.json  安装包的名称，需要拷贝</span><br><span class="line">.gitignore    限定在 push 时哪些文件可以忽略，需要拷贝</span><br><span class="line">.git&#x2F;         主题和站点都有，标志这是一个 git 项目，不需要拷贝</span><br><span class="line">node_modules&#x2F; 是安装包的目录，在执行 npm install 的时候会重新生成，不需要拷贝</span><br><span class="line">public        是 hexo g 生成的静态网页，不需要拷贝</span><br><span class="line">.deploy_git   同上，hexo g 也会生成，不需要拷贝</span><br><span class="line">db.json文件，  不需要拷贝</span><br></pre></td></tr></table></figure>
+<p>也就是说不需要拷贝的文件就是原本.gitignore文件中忽略的</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>Hexo</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Nginx相关介绍</title>
+    <url>/2020/01/31/nginx/</url>
+    <content><![CDATA[<p>假期重新Review一下各种概念<br>这篇博客主要记录下Nginx服务器的用武之地和基本概念</p>
+<a id="more"></a>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><blockquote>
+<p>Nginx是什么</p>
+</blockquote>
+<p>我刚开始接触Web开发的时候没有听过Nginx，说到服务器只知道Apache，其实Nginx和Apache一样都是Web服务器。<br>Nginx是一个Web服务器并且是一个http服务器 是一个是用C语言开发的基于REST架构风格的http服务器及反向代理服务器，以统一资源描述符(Uniform Resources Identifier)URI或者统一资源定位符(Uniform Resources Locator)URL作为沟通依据，通过HTTP协议提供各种网络服务。<br>官方测试nginx能够支支撑5万并发链接，并且cpu、内存等资源消耗却非常低，运行非常稳定。   </p>
+<p>主要处理客户端和服务端的请求分发</p>
+<blockquote>
+<p>特点和优势</p>
+</blockquote>
+<p>1.高并发<br>2.热部署<br>3.快<br>4.低功耗<br>5.热部署  </p>
+<h2 id="nginx正向代理和反向代理"><a href="#nginx正向代理和反向代理" class="headerlink" title="nginx正向代理和反向代理"></a>nginx正向代理和反向代理</h2><blockquote>
+<p>为了便于理解，首先先来了解一下一些基础知识，nginx 是一个高性能的反向代理服务器那么什么是反向代理呢？</p>
+</blockquote>
+<p>代理是在服务器和客户端之间假设的一层服务器，代理将接收客户端的请求并将它转发给服务器，然后将服务端的响应转发给客户端。<br><img src="/.com//proxy.jpg" alt="代理"></p>
+<blockquote>
+<p>正向代理</p>
+</blockquote>
+<p>正向代理（forward）意思是一个位于客户端和原始服务器 (origin server) 之间的服务器，为了从原始服务器取得内容，客户端向代理发送一个请求并指定目标 (原始服务器)，然后代理向原始服务器转交请求并将获得的内容返回给客户端。   </p>
+<p>正向代理是为我们服务的，即为客户端服务的，客户端可以根据正向代理访问到它本身无法访问到的服务器资源。   </p>
+<p>正向代理对我们是透明的，对服务端是非透明的，即服务端并不知道自己收到的是来自代理的访问还是来自真实客户端的访问。</p>
+<blockquote>
+<p>反向代理</p>
+</blockquote>
+<p>反向代理（Reverse Proxy）方式是指以代理服务器来接受 internet 上的连接请求，然后将请求转发给内部网络上的服务器，并将从服务器上得到的结果返回给 internet 上请求连接的客户端，此时代理服务器对外就表现为一个反向代理服务器。     </p>
+<p>反向代理是为服务端服务的，反向代理可以帮助服务器接收来自客户端的请求，帮助服务器做请求转发，负载均衡等。</p>
+<p>反向代理对服务端是透明的，对我们是非透明的，即我们并不知道自己访问的是代理服务器，而服务器知道反向代理在为他服务。</p>
+<h3 id="为什么要用Nginx"><a href="#为什么要用Nginx" class="headerlink" title="为什么要用Nginx"></a>为什么要用Nginx</h3><p>项目中为毛要用nginx服务器代理，不直接用tomcat服务器，还做多了一次接请求？</p>
+<p>这个是我想问的，看到很多项目是要用Nginx+tomcat开发的，但是我们知道一般用户命名可以直接访问tomcat，为啥还要用Nginx？这货是个啥玩意？（这是我刚开始疑惑很久的问题）</p>
+<p>在一般的Web项目中 并发量小 用户使用的少，所以在低并发的情况下，用户直接访问Tomcat服务器，服务器返回资源消息给用户。<br>比如上传个图片并访问图片信息：<br><img src="/.com//server1.png" alt="server1"></p>
+<p>当然我们知道，为了解决并发，可以使用负载均衡：也就是我们多增加几个tomcat服务器。当用户访问的时候，请求可以提交到空闲的tomcat服务器上<br><img src="/.com//server2.png" alt="server2"><br>但是这种情况下可能会有一种这样的问题：上传图片操作。我们把图片上传到了tomcat1上了，当我们要访问这个图片的时候，tomcat1正好在工作，所以访问的请求就交给其他的tomcat操作，而tomcat之间的数据没有进行同步，所以就发生了我们要请求的图片找不到。</p>
+<p>为了解决这种情况，我们就想出了分布式。我们专门建立一个图片服务器，用来存储图片。这样当我们都把图片上传的时候，不管是哪个服务器接收到图片，都把图片上传到图片服务器。</p>
+<p>图片服务器上需要安装一个http服务器，可以使用tomcat、apache、nginx。<br><img src="/.com//server3.png" alt="server2"><br>看到这里大家可能会问，既然我们要选择的是http服务器，为什么不继续使用tomcat，而要使用Nginx？</p>
+<h3 id="Nginx和Tomcat区别"><a href="#Nginx和Tomcat区别" class="headerlink" title="Nginx和Tomcat区别"></a>Nginx和Tomcat区别</h3><p>web上的server都叫web server，但是大家分工也有不同的。</p>
+<blockquote>
+<p>nginx常用做静态内容服务和代理服务器（不是你翻墙那个代理），直面外来请求转发给后面的应用服务（tomcat，django什么的）<br>tomcat更多用来做做一个应用容器，让java web app跑在里面的东西，对应同级别的有jboss,jetty等东西。</p>
+</blockquote>
+<p>但是事无绝对，nginx也可以通过模块开发来提供应用功能，tomcat也可以直接提供http服务，通常用在内网和不需要流控等小型服务的场景。</p>
+<p>apache用的越来越少了，大体上和nginx功能重合的更多。</p>
+<p>严格的来说，Apache/Nginx 应该叫做「HTTP Server」；而 Tomcat 则是一个「Application Server」，或者更准确的来说，是一个「Servlet/JSP」应用的容器（Ruby/Python 等其他语言开发的应用也无法直接运行在 Tomcat 上）。</p>
+<p>一个 HTTP Server 关心的是 HTTP 协议层面的传输和访问控制，所以在 Apache/Nginx 上你可以看到代理、负载均衡等功能。客户端通过 HTTP Server 访问服务器上存储的资源（HTML 文件、图片文件等等）。通过 CGI 技术，也可以将处理过的内容通过 HTTP Server 分发，但是一个 HTTP Server 始终只是把服务器上的文件如实的通过 HTTP 协议传输给客户端。</p>
+<p>而应用服务器，则是一个应用执行的容器。它首先需要支持开发语言的 Runtime（对于 Tomcat 来说，就是 Java），保证应用能够在应用服务器上正常运行。其次，需要支持应用相关的规范，例如类库、安全方面的特性。对于 Tomcat 来说，就是需要提供 JSP/Sevlet 运行需要的标准类库、Interface 等。为了方便，应用服务器往往也会集成 HTTP Server 的功能，但是不如专业的 HTTP Server 那么强大，所以应用服务器往往是运行在 HTTP Server 的背后，执行应用，将动态的内容转化为静态的内容之后，通过 HTTP Server 分发到客户端。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <categories>
+        <category>Nginx</category>
+      </categories>
+      <tags>
+        <tag>Nginx</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>初</title>
+    <url>/2020/01/27/test/</url>
+    <content><![CDATA[ <blockquote class="blockquote-center"><p>六合之外，圣人存而不论；六合之内，圣人论而不议；春秋经世先王之志，圣人议而不辩  </p>
+</blockquote>
+<a id="more"></a>
+<hr>
+<div class="note success">
+            <h3 id="基本信息："><a href="#基本信息：" class="headerlink" title="基本信息："></a>基本信息：</h3><ul><li>坐标：天津</li><li>21届毕业生在读</li><li>Java小白</li><li>GitHub：<a href="https://github.com/ccancle" target="_blank" rel="noopener">https://github.com/ccancle</a>.</li></ul>
+          </div>
+
+<div class="note info">
+            <h3 id="初："><a href="#初：" class="headerlink" title="初："></a>初：</h3><ul><li>之前的博客因为没有备份文件，硬盘损坏源文件直接GG了<br>所以在2020年新年之际 重开一个博客作为开始</li></ul>
+          </div>
+
+<div class="note primary">
+            <h3 id="专业技能"><a href="#专业技能" class="headerlink" title="专业技能"></a>专业技能</h3><ul><li>Java</li><li>SQL</li></ul>
+          </div>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>个人介绍</tag>
+      </tags>
+  </entry>
+</search>

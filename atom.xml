@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>來日可期</title>
+  <icon>http://macchac.com/icon.png</icon>
+  <subtitle>你要努力</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://macchac.com/"/>
+  <updated>2021-04-03T08:20:50.607Z</updated>
+  <id>http://macchac.com/</id>
+  
+  <author>
+    <name>Maccha</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>当你在浏览器中输入Url之后发生了什么</title>
+    <link href="http://macchac.com/2021/03/29/urll/"/>
+    <id>http://macchac.com/2021/03/29/urll/</id>
+    <published>2021-03-29T10:16:57.000Z</published>
+    <updated>2021-04-03T08:20:50.607Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;最近重新过了一遍网络的基础内容，之前看这个问题的时候觉得这个问题也没有多少东西可说，但是现在重新来看这个题目的时候，发现之前是没有一个相对完整的知识体系，这个问题基本上可以囊括一大半的网络基础知识内容&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;本次重新梳理一下这个问题的内容，其实换个角度看，这个问题也是在问HTTP请求的完整过程。&lt;/p&gt;
+&lt;p&gt;（也当是重新回学校之后开始整理博客的第一篇吧）&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="网络" scheme="http://macchac.com/categories/%E7%BD%91%E7%BB%9C/"/>
+    
+    
+      <category term="基础" scheme="http://macchac.com/tags/%E5%9F%BA%E7%A1%80/"/>
+    
+      <category term="网络" scheme="http://macchac.com/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>类的加载方式</title>
+    <link href="http://macchac.com/2020/07/07/ClassLoader-Type/"/>
+    <id>http://macchac.com/2020/07/07/ClassLoader-Type/</id>
+    <published>2020-07-07T03:41:19.000Z</published>
+    <updated>2021-03-29T08:42:41.487Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;当程序使用到某个类的时候需要把其加载到内存中调用，此时 我们知道系统会通过加载，连接，初始化三个阶段来对该类进行初始化。&lt;br&gt;而此时进行类的加载过程中有三种方式，本小记对比一下几种方式的差异&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="Java" scheme="http://macchac.com/categories/Java/"/>
+    
+      <category term="JVM" scheme="http://macchac.com/categories/Java/JVM/"/>
+    
+    
+      <category term="Java" scheme="http://macchac.com/tags/Java/"/>
+    
+      <category term="JVM" scheme="http://macchac.com/tags/JVM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ClassLoader</title>
+    <link href="http://macchac.com/2020/06/03/ClassLoader/"/>
+    <id>http://macchac.com/2020/06/03/ClassLoader/</id>
+    <published>2020-06-03T08:36:09.000Z</published>
+    <updated>2021-03-29T08:42:41.490Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; href=&quot;/css/spoiler.css&quot; type=&quot;text/css&quot;&gt;&lt;script src=&quot;/js/spoiler.js&quot; type=&quot;text/javascript&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="Java" scheme="http://macchac.com/categories/Java/"/>
+    
+      <category term="JVM" scheme="http://macchac.com/categories/Java/JVM/"/>
+    
+    
+      <category term="Java" scheme="http://macchac.com/tags/Java/"/>
+    
+      <category term="JVM" scheme="http://macchac.com/tags/JVM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>剖析Java中的装箱和拆箱</title>
+    <link href="http://macchac.com/2020/04/26/Boxing/"/>
+    <id>http://macchac.com/2020/04/26/Boxing/</id>
+    <published>2020-04-26T08:07:14.000Z</published>
+    <updated>2021-03-29T08:42:41.486Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Java中的基本类型都有对应的包装类型，基本类型与其对应的包装类型之间的赋值使用自动装箱与拆箱完成。&lt;br&gt;自动装箱和拆箱问题是Java中一个能够经常遇到的问题，今天主要先讲述装箱和拆箱的基本内容以及实现原理，另外找了一些面试题中会遇到的与装箱、拆箱相关的问题。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="Java" scheme="http://macchac.com/categories/Java/"/>
+    
+    
+      <category term="Java" scheme="http://macchac.com/tags/Java/"/>
+    
+      <category term="基础" scheme="http://macchac.com/tags/%E5%9F%BA%E7%A1%80/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java浮点数精度丢失问题</title>
+    <link href="http://macchac.com/2020/03/13/Floatat-precision/"/>
+    <id>http://macchac.com/2020/03/13/Floatat-precision/</id>
+    <published>2020-03-13T10:10:44.000Z</published>
+    <updated>2021-03-29T08:42:41.490Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;最近在练手一个电商项目，遇到一个之前听到过的问题，但原来并没有在意，就是 &lt;strong&gt;&lt;font color=&quot;#FF4500&quot;&gt;Float数值运算时精度丢失问题&lt;/font&gt;&lt;/strong&gt;&lt;br&gt;其实为什么会发生这个问题，确实也挺有意思的，这就关系到 &lt;strong&gt;&lt;font color=&quot;#FF4500&quot;&gt;IEEE-754浮点数表示法&lt;/font&gt;&lt;/strong&gt; 这个概念了。&lt;br&gt;本篇博客就再复习一遍这个概念，同时记录下如何解决这一问题。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="Java" scheme="http://macchac.com/categories/Java/"/>
+    
+    
+      <category term="Java" scheme="http://macchac.com/tags/Java/"/>
+    
+      <category term="项目踩坑" scheme="http://macchac.com/tags/%E9%A1%B9%E7%9B%AE%E8%B8%A9%E5%9D%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LeetCode_121.买卖股票的最佳时机</title>
+    <link href="http://macchac.com/2020/03/11/LeetCode-121/"/>
+    <id>http://macchac.com/2020/03/11/LeetCode-121/</id>
+    <published>2020-03-11T03:35:19.000Z</published>
+    <updated>2021-03-29T08:42:41.491Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;题目描述&quot;&gt;&lt;a href=&quot;#题目描述&quot; class=&quot;headerlink&quot; title=&quot;题目描述&quot;&gt;&lt;/a&gt;题目描述&lt;/h2&gt;&lt;p&gt;给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。&lt;/p&gt;
+&lt;p&gt;如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。&lt;/p&gt;
+&lt;p&gt;注意你不能在买入股票前卖出股票。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="LeetCode" scheme="http://macchac.com/categories/LeetCode/"/>
+    
+    
+      <category term="LeetCode" scheme="http://macchac.com/tags/LeetCode/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LeetCode 个人题解汇总(持续更新....)</title>
+    <link href="http://macchac.com/2020/03/10/LeetCode-ALL/"/>
+    <id>http://macchac.com/2020/03/10/LeetCode-ALL/</id>
+    <published>2020-03-10T08:21:51.000Z</published>
+    <updated>2021-03-29T08:42:41.491Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;原来一直没有刷题的习惯 ，而且算法一直是我特别薄弱的地方，下定决心死磕一下算法，&lt;br&gt;记录此帖也算是立一个flag吧..&lt;br&gt;从LeetCode上简单的题刷起，并记录给的解法以及自己对该题的一些理解和根据解题思路Coding出简洁一点的代码。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="LeetCode" scheme="http://macchac.com/categories/LeetCode/"/>
+    
+    
+      <category term="LeetCode" scheme="http://macchac.com/tags/LeetCode/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LeetCode_70.Climbing Stairs 爬楼梯</title>
+    <link href="http://macchac.com/2020/03/10/LeetCode-70/"/>
+    <id>http://macchac.com/2020/03/10/LeetCode-70/</id>
+    <published>2020-03-10T07:37:24.000Z</published>
+    <updated>2021-03-29T08:42:41.491Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;题目描述&quot;&gt;&lt;a href=&quot;#题目描述&quot; class=&quot;headerlink&quot; title=&quot;题目描述&quot;&gt;&lt;/a&gt;题目描述&lt;/h2&gt;&lt;p&gt;假设你正在爬楼梯。需要 n 阶你才能到达楼顶。&lt;/p&gt;
+&lt;p&gt;每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？&lt;/p&gt;
+&lt;p&gt;注意：给定 n 是一个正整数。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="LeetCode" scheme="http://macchac.com/categories/LeetCode/"/>
+    
+    
+      <category term="LeetCode" scheme="http://macchac.com/tags/LeetCode/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>备份Hexo博客</title>
+    <link href="http://macchac.com/2020/02/15/%E5%A4%87%E4%BB%BDHexo%E5%8D%9A%E5%AE%A2/"/>
+    <id>http://macchac.com/2020/02/15/%E5%A4%87%E4%BB%BDHexo%E5%8D%9A%E5%AE%A2/</id>
+    <published>2020-02-14T16:49:12.000Z</published>
+    <updated>2021-03-29T08:42:41.496Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;一：前言&quot;&gt;&lt;a href=&quot;#一：前言&quot; class=&quot;headerlink&quot; title=&quot;一：前言&quot;&gt;&lt;/a&gt;一：前言&lt;/h2&gt;&lt;p&gt;一开始接触Hexo搭建博客之后，觉得特别好使，尤其是用到的Hexo+Next，个性化东西还是挺丰富的，但是最麻烦的是源文件都是存放在本地的，是用Hexo+Github搭建只是默认把渲染生成的静态网页文件上传到github上，并没有解决Hexo源文件问题。&lt;br&gt;我因为坏过一次硬盘，没有备份源文件，相当于白给了导致只能重新搭建博客。&lt;br&gt;所以这次搭好博客之后，做的第一件事就是想办法把源文件资源备份下来&lt;br&gt;记录手动备份Hexo博客源文件的过程…&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="Hexo" scheme="http://macchac.com/categories/Hexo/"/>
+    
+    
+      <category term="Hexo" scheme="http://macchac.com/tags/Hexo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Nginx相关介绍</title>
+    <link href="http://macchac.com/2020/01/31/nginx/"/>
+    <id>http://macchac.com/2020/01/31/nginx/</id>
+    <published>2020-01-31T10:16:47.000Z</published>
+    <updated>2021-03-29T08:42:41.492Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;假期重新Review一下各种概念&lt;br&gt;这篇博客主要记录下Nginx服务器的用武之地和基本概念&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="Nginx" scheme="http://macchac.com/categories/Nginx/"/>
+    
+    
+      <category term="Nginx" scheme="http://macchac.com/tags/Nginx/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>初</title>
+    <link href="http://macchac.com/2020/01/27/test/"/>
+    <id>http://macchac.com/2020/01/27/test/</id>
+    <published>2020-01-27T06:20:32.000Z</published>
+    <updated>2021-03-29T08:42:41.495Z</updated>
+    
+    <summary type="html">
+    
+      &lt;blockquote class=&quot;blockquote-center&quot;&gt;&lt;p&gt;六合之外，圣人存而不论；六合之内，圣人论而不议；春秋经世先王之志，圣人议而不辩  &lt;/p&gt;
+&lt;/blockquote&gt;
+    
+    </summary>
+    
+    
+    
+      <category term="个人介绍" scheme="http://macchac.com/tags/%E4%B8%AA%E4%BA%BA%E4%BB%8B%E7%BB%8D/"/>
+    
+  </entry>
+  
+</feed>
