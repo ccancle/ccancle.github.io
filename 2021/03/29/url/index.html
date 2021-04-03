@@ -52,7 +52,7 @@
   <meta name="description" content="最近重新过了一遍网络的基础内容，之前看这个问题的时候觉得这个问题也没有多少东西可说，但是现在重新来看这个题目的时候，发现之前是没有一个相对完整的知识体系，这个问题基本上可以囊括一大半的网络基础知识内容 本次重新梳理一下这个问题的内容，其实换个角度看，这个问题也是在问HTTP请求的完整过程。 （也当是重新回学校之后开始整理博客的第一篇吧）">
 <meta property="og:type" content="article">
 <meta property="og:title" content="当你在浏览器中输入Url之后发生了什么">
-<meta property="og:url" content="http://macchac.com/2021/03/29/urll/index.html">
+<meta property="og:url" content="http://macchac.com/2021/03/29/url/index.html">
 <meta property="og:site_name" content="來日可期">
 <meta property="og:description" content="最近重新过了一遍网络的基础内容，之前看这个问题的时候觉得这个问题也没有多少东西可说，但是现在重新来看这个题目的时候，发现之前是没有一个相对完整的知识体系，这个问题基本上可以囊括一大半的网络基础知识内容 本次重新梳理一下这个问题的内容，其实换个角度看，这个问题也是在问HTTP请求的完整过程。 （也当是重新回学校之后开始整理博客的第一篇吧）">
 <meta property="og:locale" content="zh_CN">
@@ -71,14 +71,14 @@
 <meta property="og:image" content="http://macchac.com/.com//StrongCache.png">
 <meta property="og:image" content="http://macchac.com/.com//CompareCache.png">
 <meta property="article:published_time" content="2021-03-29T10:16:57.000Z">
-<meta property="article:modified_time" content="2021-04-03T08:20:50.607Z">
+<meta property="article:modified_time" content="2021-04-03T08:25:57.864Z">
 <meta property="article:author" content="Maccha">
 <meta property="article:tag" content="基础">
 <meta property="article:tag" content="网络">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://macchac.com/.com//HTTP-Cache.jpg">
 
-<link rel="canonical" href="http://macchac.com/2021/03/29/urll/">
+<link rel="canonical" href="http://macchac.com/2021/03/29/url/">
 
 
 <script id="page-configurations">
@@ -184,17 +184,17 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">9</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">10</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">6</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">7</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">11</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">12</span></a>
 
   </li>
         <li class="menu-item menu-item-sitemap">
@@ -259,7 +259,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://macchac.com/2021/03/29/urll/">
+    <link itemprop="mainEntityOfPage" href="http://macchac.com/2021/03/29/url/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/maccha.gif">
@@ -698,20 +698,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -760,13 +760,13 @@
       <i class="fa fa-area-chart"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">23k</span>
+    <span title="站点总字数">26k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">21 分钟</span>
+    <span title="站点阅读时长">24 分钟</span>
 </div><div class="translate-style">
 繁/简：<a id="translateLink" href="javascript:translatePage();">繁体
 </a>

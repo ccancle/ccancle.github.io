@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://macchac.com/"/>
-  <updated>2021-04-03T08:20:50.607Z</updated>
+  <updated>2021-04-03T08:25:57.864Z</updated>
   <id>http://macchac.com/</id>
   
   <author>
@@ -18,10 +18,10 @@
   
   <entry>
     <title>当你在浏览器中输入Url之后发生了什么</title>
-    <link href="http://macchac.com/2021/03/29/urll/"/>
-    <id>http://macchac.com/2021/03/29/urll/</id>
+    <link href="http://macchac.com/2021/03/29/url/"/>
+    <id>http://macchac.com/2021/03/29/url/</id>
     <published>2021-03-29T10:16:57.000Z</published>
-    <updated>2021-04-03T08:20:50.607Z</updated>
+    <updated>2021-04-03T08:25:57.864Z</updated>
     
     <summary type="html">
     
@@ -228,6 +228,31 @@
     
     
       <category term="Hexo" scheme="http://macchac.com/tags/Hexo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hexo博客搭建</title>
+    <link href="http://macchac.com/2020/02/14/Hexo%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/"/>
+    <id>http://macchac.com/2020/02/14/Hexo%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/</id>
+    <published>2020-02-14T10:55:02.000Z</published>
+    <updated>2021-04-03T08:23:55.878Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;整理一下博客建站的工序：使用 &lt;strong&gt;&lt;font color=&quot;#FF4500&quot;&gt;Hexo + Github Pages&lt;/font&gt;&lt;/strong&gt;&lt;br&gt;Hexo是一个快速高效的博客框架，可以使用Markdown解析文章 可以使用近三百种主题生成静态网页&lt;br&gt;这里博客网站搭建使用的是把个人博客托管到GitHub Pages上。Github Pages是一种静态站点托管服务 每个Github账户都能有属于自己的站点。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="Hexo" scheme="http://macchac.com/categories/Hexo/"/>
+    
+      <category term="Next" scheme="http://macchac.com/categories/Hexo/Next/"/>
+    
+    
+      <category term="Hexo" scheme="http://macchac.com/tags/Hexo/"/>
+    
+      <category term="工具使用" scheme="http://macchac.com/tags/%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/"/>
     
   </entry>
   
